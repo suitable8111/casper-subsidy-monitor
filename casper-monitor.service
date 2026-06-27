@@ -1,0 +1,27 @@
+# systemd 유닛 — 리눅스 서버에서 24시간 상시 실행 + 자동 재시작
+#
+# 설치:
+#   1) 이 리포를 서버에 clone   (예: /opt/casper-subsidy-monitor)
+#   2) cp .env.example .env  후 .env 에 DISCORD_WEBHOOK_URL 등 입력
+#   3) 아래 User / WorkingDirectory / ExecStart 경로를 본인 환경에 맞게 수정
+#   4) sudo cp casper-monitor.service /etc/systemd/system/
+#      sudo systemctl daemon-reload
+#      sudo systemctl enable --now casper-monitor
+#   5) 로그 확인:  journalctl -u casper-monitor -f
+
+[Unit]
+Description=Casper EV Subsidy Monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/casper-subsidy-monitor
+EnvironmentFile=/opt/casper-subsidy-monitor/.env
+ExecStart=/usr/bin/python3 /opt/casper-subsidy-monitor/casper_subsidy_monitor.py
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
