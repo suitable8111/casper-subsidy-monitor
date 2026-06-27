@@ -174,10 +174,11 @@ def run_once_and_notify(state: dict) -> dict:
         ok = send_discord(build_available_message(data))
         log("   → 전송 성공" if ok else "   → 전송 실패(콘솔 확인)")
     elif NOTIFY_EACH_CHECK:
-        send_discord(
-            f"[모니터링] {REGION_NAME} 현재 {'가능✅' if available else '마감/대기⏳'} "
+        ok = send_discord(
+            f"[모니터링 테스트] {REGION_NAME} 현재 {'가능✅' if available else '마감/대기⏳'} "
             f"(state={cur_flag}, msg='{cur_msg}')"
         )
+        log("   → 디스코드 전송 성공" if ok else "   → 디스코드 전송 실패")
 
     state.update({
         "available": available,
