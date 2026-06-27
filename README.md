@@ -1,7 +1,7 @@
 # 캐스퍼 EV 보조금 신청가능 모니터
 
 경남 김해시(또는 원하는 지자체)의 캐스퍼 일렉트릭 전기차 구매보조금이
-**"임시중단/마감"** → **"신청 가능"** 으로 바뀌는 순간을 1시간 주기로 감지해서
+**"임시중단/마감"** → **"신청 가능"** 으로 바뀌는 순간을 **매 정시각(8:00, 9:00, 10:00 …)** 감지해서
 **Discord로 알림**(`@everyone`)을 보냅니다.
 
 > 의존성 없음 — Python 3 표준 라이브러리만 사용합니다 (`pip install` 불필요).
@@ -181,7 +181,8 @@ GET https://casper.hyundai.com/gw/wp/product/v2/product/elec-subsidy/region-info
 | `DISCORD_CHANNEL_ID` | — | 알림 채널 ID (방법 B) |
 | `CASPER_REGION_CODE` | `4825` | 지자체 행정코드 (경남 김해시) |
 | `CASPER_REGION_NAME` | `경남 김해시` | 알림 문구용 지역 이름 |
-| `CASPER_INTERVAL_SEC` | `3600` | 폴링 주기(초) |
+| `CASPER_ALIGN_TO_HOUR` | `1` | `1`이면 매 정시각(HH:00)에 체크. `0`이면 `INTERVAL_SEC` 간격 |
+| `CASPER_INTERVAL_SEC` | `3600` | `ALIGN_TO_HOUR=0`일 때만 사용하는 폴링 주기(초) |
 | `CASPER_STATE_FILE` | 스크립트 옆 | 상태 저장 파일 경로 |
 | `CASPER_NOTIFY_EACH_CHECK` | `0` | `1`이면 매 체크마다 현재상태도 전송(테스트용) |
 

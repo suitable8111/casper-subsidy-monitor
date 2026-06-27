@@ -2,7 +2,7 @@
 """
 캐스퍼 일렉트릭 전기차 구매보조금 신청가능 모니터링
 
-현대 캐스퍼 견적 페이지가 내부적으로 호출하는 공개 API를 1시간(기본) 주기로 폴링한다.
+현대 캐스퍼 견적 페이지가 내부적으로 호출하는 공개 API를 매 정시각(8:00, 9:00, …) 폴링한다.
 지정한 지자체(기본: 경남 김해시, regionCode=4825)의 보조금 신청 상태가
 "임시중단/마감"(finalSubsidyApplyState == 'F', "다음 공모를 기다려주세요") 에서
 "신청 가능" 으로 바뀌면 Discord 로 알림을 보낸다.
@@ -21,7 +21,8 @@ API:  GET https://casper.hyundai.com/gw/wp/product/v2/product/elec-subsidy/regio
 선택 환경변수:
   CASPER_REGION_CODE  (기본 4825 = 경남 김해시)
   CASPER_REGION_NAME  (기본 "경남 김해시" — 알림 문구용)
-  CASPER_INTERVAL_SEC (기본 3600 = 1시간)
+  CASPER_ALIGN_TO_HOUR (기본 1 = 매 정시각 체크. 0 이면 INTERVAL_SEC 간격)
+  CASPER_INTERVAL_SEC (ALIGN_TO_HOUR=0 일 때만 사용. 기본 3600 = 1시간)
   CASPER_NOTIFY_EACH_CHECK (1 이면 매 체크마다 현재상태도 보고 — 디버그용)
   CASPER_STATE_FILE   (상태 저장 파일 경로. 기본: 스크립트 옆 casper_monitor_state.json)
 
@@ -37,7 +38,7 @@ import sys
 import time
 import urllib.request
 import urllib.error
-from datetime import datetime
+from datetime import datetime, timedelta
 
 API_URL = (
     "https://casper.hyundai.com/gw/wp/product/v2/product/elec-subsidy/region-info"
@@ -48,6 +49,8 @@ ESTIMATION_PAGE = "https://casper.hyundai.com/vehicles/electric/making/model"
 REGION_CODE = os.environ.get("CASPER_REGION_CODE", "4825")
 REGION_NAME = os.environ.get("CASPER_REGION_NAME", "경남 김해시")
 INTERVAL_SEC = int(os.environ.get("CASPER_INTERVAL_SEC", "3600"))
+# 1 이면 매 정시각(8:00, 9:00, 10:00 …)에 체크. 0 이면 INTERVAL_SEC 간격으로 체크.
+ALIGN_TO_HOUR = os.environ.get("CASPER_ALIGN_TO_HOUR", "1") == "1"
 NOTIFY_EACH_CHECK = os.environ.get("CASPER_NOTIFY_EACH_CHECK", "0") == "1"
 
 WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL", "").strip()
@@ -64,6 +67,13 @@ UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML,
 
 def log(msg: str) -> None:
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}", flush=True)
+
+
+def seconds_until_next_hour() -> float:
+    """다음 정시각(HH:00:00)까지 남은 초를 반환."""
+    now = datetime.now()
+    next_hour = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+    return (next_hour - now).total_seconds()
 
 
 def fetch_status():
@@ -175,7 +185,7 @@ def run_once_and_notify(state: dict) -> dict:
         log("   → 전송 성공" if ok else "   → 전송 실패(콘솔 확인)")
     elif NOTIFY_EACH_CHECK:
         ok = send_discord(
-            f"[모니터링 테스트] {REGION_NAME} 현재 {'가능✅' if available else '마감/대기⏳'} "
+            f"[캐스퍼 보조금 모니터링] {REGION_NAME} 현재 {'가능✅' if available else '마감/대기⏳'} "
             f"(state={cur_flag}, msg='{cur_msg}')"
         )
         log("   → 디스코드 전송 성공" if ok else "   → 디스코드 전송 실패")
@@ -194,8 +204,9 @@ def run_once_and_notify(state: dict) -> dict:
 
 def main():
     once = "--once" in sys.argv
-    log("=== 캐스퍼 EV 보조금 모니터 시작 ===")
-    log(f"지역: {REGION_NAME} (regionCode={REGION_CODE}) / 주기: {INTERVAL_SEC}s")
+    log("=== 캐스퍼 보조금 모니터링 시작 ===")
+    schedule = "매 정시각(HH:00)" if ALIGN_TO_HOUR else f"{INTERVAL_SEC}초 간격"
+    log(f"지역: {REGION_NAME} (regionCode={REGION_CODE}) / 체크 주기: {schedule}")
     if WEBHOOK_URL:
         log("알림 방식: Discord Webhook")
     elif BOT_TOKEN and CHANNEL_ID:
@@ -212,7 +223,14 @@ def main():
 
     while True:
         try:
-            time.sleep(INTERVAL_SEC)
+            if ALIGN_TO_HOUR:
+                wait = seconds_until_next_hour()
+                nxt = (datetime.now() + timedelta(seconds=wait)).strftime("%H:%M")
+                log(f"다음 체크: {nxt} (정시) — {int(wait)}초 후")
+            else:
+                wait = INTERVAL_SEC
+                log(f"다음 체크: {int(wait)}초 후")
+            time.sleep(wait)
         except KeyboardInterrupt:
             log("종료합니다.")
             break
