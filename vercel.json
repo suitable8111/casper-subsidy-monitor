@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "redirects": [
+    { "source": "/casper", "destination": "/casper/casper_report/" },
+    { "source": "/ev", "destination": "/ev/ev_subsidy/" }
+  ]
+}

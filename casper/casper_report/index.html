@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>캐스퍼 EV 재고전 보고서</title>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GQE11GFRJC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GQE11GFRJC');
+</script>
+<style>
+  :root{ --bg:#0f1115; --card:#171a21; --line:#262b36; --txt:#e6e9ef; --sub:#9aa3b2;
+         --accent:#3b82f6; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--txt);
+        font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
+  .wrap{ max-width:1240px; margin:0 auto; padding:28px 20px 80px; }
+  h1{ font-size:24px; margin:0 0 4px; }
+  .topbar{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+  .navbtn{ display:inline-flex; align-items:center; gap:7px; text-decoration:none; white-space:nowrap;
+           background:linear-gradient(90deg,#0b5cad,#0a7d4b); color:#fff; font-size:13px; font-weight:600;
+           padding:10px 16px; border-radius:10px; border:1px solid #2a6fb5; transition:.12s; }
+  .navbtn:hover{ filter:brightness(1.12); transform:translateY(-1px); }
+  .navbtn .ar{ font-size:15px; }
+  .meta{ color:var(--sub); font-size:13px; margin-bottom:24px; }
+  .cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:24px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .card .n{ font-size:24px; font-weight:700; }
+  .card .l{ color:var(--sub); font-size:12px; margin-top:4px; }
+  section{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:20px; }
+  h2{ font-size:15px; margin:0 0 14px; color:var(--sub); font-weight:600; letter-spacing:.3px;
+      display:flex; align-items:center; justify-content:space-between; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th,td{ text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ color:var(--sub); font-weight:600; cursor:pointer; user-select:none; position:sticky; top:0;
+      background:var(--card); white-space:nowrap; }
+  th[data-sort]:hover{ color:var(--txt); }
+  tr:hover td{ background:#1b1f28; }
+  .pill{ display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600; white-space:nowrap; }
+  .t-라운지{ background:#7c3aed22; color:#c4b5fd; } .t-크로스{ background:#0891b222; color:#67e8f9; }
+  .t-프리미엄{ background:#22c55e22; color:#86efac; } .t-인스퍼레이션{ background:#f59e0b22; color:#fcd34d; }
+  .bar{ height:8px; background:#222733; border-radius:6px; overflow:hidden; min-width:60px; margin-top:6px; }
+  .bar>i{ display:block; height:100%; background:linear-gradient(90deg,#3b82f6,#22c55e); }
+  .controls{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; align-items:center; }
+  input,select,button{ background:#0f131a; border:1px solid var(--line); color:var(--txt);
+                padding:8px 10px; border-radius:8px; font-size:13px; }
+  button{ cursor:pointer; } button:hover{ border-color:var(--accent); }
+  input::placeholder{ color:#5b6472; }
+  .muted{ color:var(--sub); } .right{ text-align:right; } .nowrap{ white-space:nowrap; }
+  .count{ color:var(--sub); font-size:12px; font-weight:400; }
+  .sublabel{ color:var(--sub); font-size:12px; font-weight:600; margin:4px 0 8px; }
+  .heat{ display:grid; grid-template-columns:repeat(auto-fill,minmax(115px,1fr)); gap:8px; }
+  .reg{ border:1px solid var(--line); border-radius:9px; padding:10px; cursor:pointer; transition:.12s; }
+  .reg:hover{ border-color:var(--accent); background:#1b1f28; }
+  .reg.sel{ border-color:var(--accent); background:#13233f; }
+  .reg.zero{ opacity:.4; }
+  .reg .name{ font-size:13px; font-weight:600; }
+  .reg .v{ font-size:20px; font-weight:700; margin-top:2px; }
+  .opt{ font-size:11px; color:#cbd5e1; white-space:normal; max-width:230px; }
+  .optp{ color:var(--good); font-weight:600; }
+  .foundIn{ font-size:11px; color:var(--sub); white-space:normal; max-width:240px; }
+  .tag{ display:inline-block; background:#1f2632; border-radius:6px; padding:1px 6px; margin:1px 2px 1px 0; font-size:10px; }
+  .selbar{ background:#13233f; border:1px solid var(--accent); border-radius:9px; padding:8px 12px;
+           margin-bottom:12px; display:none; align-items:center; gap:10px; font-size:13px; }
+  .adfit{ display:flex; justify-content:center; flex-wrap:wrap; gap:12px; margin:8px 0 24px; min-height:100px; }
+  .tblwrap{ overflow:auto; max-height:680px; }
+  #adfit-side{ position:fixed; top:96px; right:calc((100vw - 1240px)/2 - 180px); display:none; z-index:5; }
+  @media (min-width:1600px){ #adfit-side{ display:block; } }
+
+  /* ── 모바일: 테이블을 카드형으로(가로 잘림 해결) ── */
+  @media (max-width:720px){
+    .wrap{ padding:16px 12px 64px; }
+    h1{ font-size:20px; }
+    .topbar{ gap:10px; }
+    .navbtn{ padding:8px 13px; font-size:12px; }
+    section{ padding:14px 12px; }
+    h2{ flex-direction:column; align-items:flex-start; gap:4px; }
+    .controls{ gap:8px; }
+    .controls input, .controls select{ flex:1 1 140px; min-width:0 !important; width:auto !important; }
+    .heat{ grid-template-columns:repeat(auto-fill,minmax(104px,1fr)); }
+
+    .tblwrap{ overflow:visible; max-height:none; }
+    #tbl thead{ display:none; }
+    #tbl, #tbl tbody{ display:block; width:100%; }
+    #tbl tr{ display:block; border:1px solid var(--line); border-radius:10px;
+             background:#0f131a; padding:10px 13px; margin-bottom:10px; }
+    #tbl td{ display:block; border:none; border-bottom:1px solid #1b1f28;
+             padding:6px 0; white-space:normal !important; text-align:left !important; }
+    #tbl tr td:last-child{ border-bottom:none; }
+    #tbl td::before{ content:attr(data-label); display:block; color:var(--sub);
+                     font-size:10.5px; font-weight:600; margin-bottom:2px; }
+    #tbl td[data-label="트림"]{ padding-top:0; }
+    #tbl td[data-label="판매금액"]{ font-size:15px; font-weight:700; }
+    .opt, .foundIn{ max-width:none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="adfit-side"></div>
+<div class="wrap">
+  <div class="topbar">
+    <h1>🚗 캐스퍼 EV 재고전 보고서</h1>
+    <a class="navbtn" href="/ev/ev_subsidy/">⚡ 전기차 지자체 보조금 리포트 <span class="ar">→</span></a>
+  </div>
+  <div class="meta">
+    기획전 <b>E20260666</b> · AX05 (2026 캐스퍼 일렉트릭) ·
+    수집시각 <span id="ts"></span> · 스캔범위 sido (시/도별 대표 시/군/구 1곳; 페이지네이션 포함)
+  </div>
+
+  <div class="adfit" id="adfit-top"></div>
+
+  <div class="cards" id="stat"></div>
+
+  <section>
+    <h2>지역별 재고 (totalCount) <span class="count">— 카드를 클릭하면 해당 지역 기준으로 차량을 필터링합니다</span></h2>
+    <div class="heat" id="heat"></div>
+  </section>
+
+  <section>
+    <h2>트림별 재고 <span class="count">— 고유 차량 24대 기준 · 카드 클릭 시 해당 트림으로 필터</span></h2>
+    <div class="heat" id="trimSum"></div>
+  </section>
+
+  <section>
+    <h2>색상별 재고 <span class="count">— 고유 차량 24대 기준 · 카드 클릭 시 해당 색상으로 필터</span></h2>
+    <div class="sublabel">외장 색상</div>
+    <div class="heat" id="extSum"></div>
+    <div class="sublabel" style="margin-top:14px">내장 색상</div>
+    <div class="heat" id="intSum"></div>
+  </section>
+
+  <div class="adfit" id="adfit-mid"></div>
+
+  <section>
+    <h2><span>차량 목록 <span class="count" id="rowcount"></span></span></h2>
+    <div class="selbar" id="selbar">
+      <b id="selName"></b> 기준으로 표시 중
+      <button id="clearReg">전체 보기 ✕</button>
+    </div>
+    <div class="controls">
+      <select id="region"><option value="">📍 지역 선택(전체)</option></select>
+      <input id="q" placeholder="🔎 통합검색(트림·색상·옵션·출고센터)" style="min-width:240px" />
+      <select id="trim"><option value="">트림 전체</option></select>
+      <select id="center"><option value="">출고센터 전체</option></select>
+      <input id="maxp" type="number" placeholder="최대 판매금액(원)" style="width:160px" />
+      <input id="fext" placeholder="외장색상" style="width:120px" />
+      <input id="fint" placeholder="내장색상" style="width:120px" />
+      <input id="fopt" placeholder="옵션" style="width:120px" />
+    </div>
+    <div class="tblwrap">
+      <table id="tbl">
+        <thead><tr>
+          <th data-sort="trim">트림</th>
+          <th data-sort="ext">외장색상</th>
+          <th data-sort="int">내장색상</th>
+          <th data-sort="price" class="right">판매금액</th>
+          <th data-sort="optTotal" class="right">옵션</th>
+          <th data-sort="center">출고센터</th>
+          <th data-sort="prdnDt">생산일</th>
+          <th data-sort="nreg" class="right">노출지역</th>
+          <th id="foundCol">노출 지역 목록</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="adfit" id="adfit-bottom"></div>
+
+  <div class="meta">
+    ⚠️ 수집 시점의 스냅샷이며 재고는 실시간 변동됩니다. 옵션은 차량별 기본 장착 선택품목입니다.
+    인증·결제·계약 확정은 직접 진행하세요.
+  </div>
+</div>
+
+<script>
+const DATA = {"collectedAt":"2026-06-28T12:38:20.549Z","exhbNo":"E20260666","carCode":"AX05 (2026 캐스퍼 일렉트릭)","scanDepth":"sido (시/도별 대표 시/군/구 1곳; 페이지네이션 포함)","note":"옵션 opt=\"이름:가격;...\" (원). saleCtyNo 기준 중복제거. totalCount=지역 전체 재고수.","optionFormat":"opt 필드: \"옵션명:가격;옵션명:가격\" (단위 원)","regionSummary":[{"sido":"서울","sigun":"서울특별시","totalCount":5,"collected":5},{"sido":"인천","sigun":"강화군","totalCount":5,"collected":5},{"sido":"경기","sigun":"가평군","totalCount":5,"collected":5},{"sido":"강원","sigun":"강릉시","totalCount":1,"collected":1},{"sido":"세종","sigun":"세종특별자치시","totalCount":11,"collected":11},{"sido":"충남","sigun":"계룡시","totalCount":11,"collected":11},{"sido":"대전","sigun":"대전광역시","totalCount":11,"collected":11},{"sido":"충북","sigun":"괴산군","totalCount":11,"collected":11},{"sido":"대구","sigun":"군위군","totalCount":0,"collected":0},{"sido":"경북","sigun":"경산시","totalCount":0,"collected":0},{"sido":"부산","sigun":"부산광역시","totalCount":4,"collected":4},{"sido":"경남","sigun":"거제시","totalCount":4,"collected":4},{"sido":"울산","sigun":"울산광역시","totalCount":0,"collected":0},{"sido":"전북","sigun":"고창군","totalCount":9,"collected":9},{"sido":"전남","sigun":"강진군","totalCount":4,"collected":4},{"sido":"광주","sigun":"광주광역시","totalCount":4,"collected":4},{"sido":"제주","sigun":"서귀포시","totalCount":12,"collected":9}],"totalUniqueCars":24,"inventory":[{"saleCtyNo":"B01-AXJJ4VPT5-A02","trim":"프리미엄","ext":"아틀라스 화이트","int":"블랙","price":30360000,"center":"옥천출고센터","prdnDt":"20260604","colorPkg":"기본","opt":"현대 스마트 센스 I:1000000","foundIn":["세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군"]},{"saleCtyNo":"B01-AXJJ4VPT5-A04","trim":"프리미엄","ext":"어비스 블랙 펄","int":"블랙","price":30560000,"center":"아산출고센터","prdnDt":"20260623","colorPkg":"기본","opt":"현대 스마트 센스 I:1000000;하이패스:200000","foundIn":["서울 서울특별시","인천 강화군","경기 가평군","세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군","전남 강진군","광주 광주광역시","제주 서귀포시"]},{"saleCtyNo":"B01-AXJJ4VCT5-S01","trim":"인스퍼레이션","ext":"버터크림 옐로우 펄","int":"베이지","price":33240000,"center":"전주출고센터","prdnDt":"20260616","colorPkg":"실내 컬러 패키지","opt":"","foundIn":["전북 고창군"]},{"saleCtyNo":"B01-AXJJ4VCT5-A02","trim":"인스퍼레이션","ext":"버터크림 옐로우 펄","int":"블랙","price":33440000,"center":"옥천출고센터","prdnDt":"20260619","colorPkg":"기본","opt":"선루프:400000","foundIn":["세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군"]},{"saleCtyNo":"B01-AXJJ4VCT5-A05","trim":"인스퍼레이션","ext":"언블리치드 아이보리","int":"블랙","price":33640000,"center":"전주출고센터","prdnDt":"20260611","colorPkg":"기본","opt":"컴포트:600000","foundIn":["전북 고창군"]},{"saleCtyNo":"B01-AXJJ4VCT5-A09","trim":"인스퍼레이션","ext":"톰보이 카키","int":"블랙","price":33740000,"center":"전주출고센터","prdnDt":"20260613","colorPkg":"기본","opt":"파킹 어시스트:700000","foundIn":["전북 고창군"]},{"saleCtyNo":"B01-AXJJ4VCT5-A21","trim":"인스퍼레이션","ext":"어비스 블랙 펄","int":"블랙","price":34840000,"center":"아산출고센터","prdnDt":"20260613","colorPkg":"기본","opt":"익스테리어 디자인:1200000;컴포트:600000","foundIn":["서울 서울특별시","인천 강화군","경기 가평군","세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군","전남 강진군","광주 광주광역시","제주 서귀포시"]},{"saleCtyNo":"B01-AXJJ4VKT5-A01","trim":"크로스","ext":"언블리치드 아이보리","int":"다크 그레이/아마조나스 그린","price":35150000,"center":"옥천출고센터","prdnDt":"20260616","colorPkg":"기본","opt":"","foundIn":["세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군","전남 강진군","광주 광주광역시","제주 서귀포시"]},{"saleCtyNo":"B01-AXJJ4VCT5-S20","trim":"인스퍼레이션","ext":"언블리치드 아이보리","int":"베이지","price":35440000,"center":"신갈출고센터","prdnDt":"20260613","colorPkg":"실내 컬러 패키지","opt":"익스테리어 디자인:1200000;컨비니언스 플러스:600000;선루프:400000","foundIn":["서울 서울특별시","인천 강화군","경기 가평군"]},{"saleCtyNo":"B01-AXJJ4VCT5-A29","trim":"인스퍼레이션","ext":"버터크림 옐로우 펄","int":"블랙","price":35540000,"center":"옥천출고센터","prdnDt":"20260616","colorPkg":"기본","opt":"익스테리어 디자인:1200000;파킹 어시스트:700000;컴포트:600000","foundIn":["세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군"]},{"saleCtyNo":"B01-AXJJ4VCT5-S29","trim":"인스퍼레이션","ext":"톰보이 카키","int":"베이지","price":35740000,"center":"아산출고센터","prdnDt":"20260616","colorPkg":"실내 컬러 패키지","opt":"익스테리어 디자인:1200000;파킹 어시스트:700000;컴포트:600000","foundIn":["서울 서울특별시","인천 강화군","경기 가평군","세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군","제주 서귀포시"]},{"saleCtyNo":"B01-AXJJ4VCT5-S27","trim":"인스퍼레이션","ext":"버터크림 옐로우 펄","int":"베이지","price":35740000,"center":"함안출고센터","prdnDt":"20260615","colorPkg":"실내 컬러 패키지","opt":"익스테리어 디자인:1200000;파킹 어시스트:700000;컨비니언스 플러스:600000","foundIn":["부산 부산광역시","경남 거제시","전남 강진군","광주 광주광역시","제주 서귀포시"]},{"saleCtyNo":"B01-AXJJ4VKT5-A09","trim":"크로스","ext":"톰보이 카키","int":"블랙","price":35850000,"center":"함안출고센터","prdnDt":"20260617","colorPkg":"기본","opt":"파킹 어시스트:700000","foundIn":["부산 부산광역시","경남 거제시","전북 고창군","제주 서귀포시"]},{"saleCtyNo":"B01-AXJJ4VCT5-J15","trim":"인스퍼레이션","ext":"아틀라스 화이트(투톤)","int":"베이지","price":36140000,"center":"원주출고센터","prdnDt":"20260622","colorPkg":"투톤 컬러 루프+실내 컬러 패키지","opt":"익스테리어 디자인:1200000;파킹 어시스트:700000;컴포트:600000","foundIn":["강원 강릉시"]},{"saleCtyNo":"B01-AXJJ4VCT5-A31","trim":"인스퍼레이션","ext":"버터크림 옐로우 펄","int":"블랙","price":36140000,"center":"전주출고센터","prdnDt":"20260528","colorPkg":"기본","opt":"익스테리어 디자인:1200000;파킹 어시스트:700000;컴포트:600000;컨비니언스 플러스:600000","foundIn":["전북 고창군"]},{"saleCtyNo":"B01-AXJJ4VCT5-S31","trim":"인스퍼레이션","ext":"언블리치드 아이보리","int":"베이지","price":36340000,"center":"전주출고센터","prdnDt":"20260529","colorPkg":"실내 컬러 패키지","opt":"익스테리어 디자인:1200000;파킹 어시스트:700000;컴포트:600000;컨비니언스 플러스:600000","foundIn":["전북 고창군"]},{"saleCtyNo":"B01-AXJJ4VCT5-T16","trim":"인스퍼레이션","ext":"톰보이 카키(투톤)","int":"블랙","price":36540000,"center":"옥천출고센터","prdnDt":"20260619","colorPkg":"투톤 컬러 루프","opt":"익스테리어 디자인:1200000;파킹 어시스트:700000;컴포트:600000;컨비니언스 플러스:600000","foundIn":["세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군"]},{"saleCtyNo":"B01-AXJJ4VCT5-A32","trim":"인스퍼레이션","ext":"언블리치드 아이보리","int":"블랙","price":36540000,"center":"전주출고센터","prdnDt":"20260619","colorPkg":"기본","opt":"익스테리어 디자인:1200000;파킹 어시스트:700000;컴포트:600000;컨비니언스 플러스:600000;선루프:400000","foundIn":["전북 고창군"]},{"saleCtyNo":"B01-AXJJ4VCT5-S32","trim":"인스퍼레이션","ext":"아틀라스 화이트","int":"베이지","price":36740000,"center":"함안출고센터","prdnDt":"20260615","colorPkg":"실내 컬러 패키지","opt":"익스테리어 디자인:1200000;파킹 어시스트:700000;컴포트:600000;컨비니언스 플러스:600000;선루프:400000","foundIn":["부산 부산광역시","경남 거제시","전북 고창군","제주 서귀포시"]},{"saleCtyNo":"B01-AXJJ4VKT5-A08","trim":"크로스","ext":"톰보이 카키","int":"블랙","price":36750000,"center":"옥천출고센터","prdnDt":"20260613","colorPkg":"기본","opt":"컨비니언스 플러스:600000;컴포트:600000;선루프:400000","foundIn":["세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군"]},{"saleCtyNo":"B01-AXJJ4VKT5-A15","trim":"크로스","ext":"더스크 블루 매트","int":"블랙","price":37050000,"center":"옥천출고센터","prdnDt":"20260623","colorPkg":"기본","opt":"파킹 어시스트:700000;컴포트:600000;컨비니언스 플러스:600000","foundIn":["세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군"]},{"saleCtyNo":"B01-AXJJ4VKT5-T08","trim":"크로스","ext":"톰보이 카키(투톤)","int":"블랙","price":37450000,"center":"아산출고센터","prdnDt":"20260622","colorPkg":"투톤 컬러 루프","opt":"파킹 어시스트:700000;컴포트:600000;컨비니언스 플러스:600000","foundIn":["서울 서울특별시","인천 강화군","경기 가평군","세종 세종특별자치시","충남 계룡시","대전 대전광역시","충북 괴산군","제주 서귀포시"]},{"saleCtyNo":"B01-AXJJ4VKT5-A16","trim":"크로스","ext":"아틀라스 화이트","int":"다크 그레이/아마조나스 그린","price":37450000,"center":"전주출고센터","prdnDt":"20260615","colorPkg":"기본","opt":"파킹 어시스트:700000;컴포트:600000;컨비니언스 플러스:600000;선루프:400000","foundIn":["전북 고창군"]},{"saleCtyNo":"B01-AXJJ4VLT5-A18","trim":"라운지","ext":"어비스 블랙 펄","int":"다크 그레이/다크 오렌지(천연가죽)","price":38560000,"center":"함안출고센터","prdnDt":"20260616","colorPkg":"기본","opt":"파킹 어시스트:700000;컨비니언스 플러스:600000;컴포트(라운지전용):450000;선루프:400000","foundIn":["부산 부산광역시","경남 거제시","제주 서귀포시"]}]};
+const won = n => Number(n).toLocaleString('ko-KR')+'원';
+const man = n => n>=10000 ? (n/10000).toLocaleString('ko-KR')+'만' : n.toLocaleString('ko-KR');
+const fmtDate = s => s && s.length===8 ? `${s.slice(0,4)}.${s.slice(4,6)}.${s.slice(6,8)}` : (s||'');
+const regTag = r => r.sido + (r.sigun && r.sigun!==r.sido ? ' '+r.sigun : '');
+
+// opt 문자열 "이름:가격;이름:가격" 파싱
+function parseOpt(s){ if(!s) return []; return s.split(';').map(x=>{ const i=x.lastIndexOf(':'); return {n:x.slice(0,i), p:Number(x.slice(i+1))||0}; }); }
+const inv = DATA.inventory.map(c=>{ const opts=parseOpt(c.opt); return { ...c, opts, optTotal:opts.reduce((a,o)=>a+o.p,0), nreg:(c.foundIn||[]).length }; });
+
+document.getElementById('ts').textContent = new Date(DATA.collectedAt).toLocaleString('ko-KR');
+
+// 통계 카드
+const prices = inv.map(c=>c.price);
+const regWithStock = DATA.regionSummary.filter(r=>r.totalCount>0).length;
+document.getElementById('stat').innerHTML = [
+  ['고유 차량', DATA.totalUniqueCars+'대'],
+  ['최저가', won(Math.min(...prices))],
+  ['최고가', won(Math.max(...prices))],
+  ['재고 보유 지역', regWithStock+'/'+DATA.regionSummary.length],
+].map(([l,n])=>`<div class="card"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+
+// 상태
+let selectedRegion = '';   // foundIn 태그
+let sortKey='price', sortDir=1;
+
+// 지역 히트맵 (클릭 → 필터)
+const maxReg = Math.max(...DATA.regionSummary.map(r=>r.totalCount||0),1);
+const heatEl = document.getElementById('heat');
+function renderHeat(){
+  heatEl.innerHTML = DATA.regionSummary.slice().sort((a,b)=>b.totalCount-a.totalCount).map(r=>{
+    const tag=regTag(r); const pct=Math.round((r.totalCount/maxReg)*100);
+    const sel = tag===selectedRegion ? ' sel' : '';
+    return `<div class="reg${r.totalCount?'':' zero'}${sel}" data-region="${tag}">
+      <div class="name">${r.sido} <span class="muted">${r.sigun||''}</span></div>
+      <div class="v">${r.totalCount}<span class="muted" style="font-size:12px">대</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div></div>`;
+  }).join('');
+  heatEl.querySelectorAll('.reg').forEach(el=>el.onclick=()=>{ setRegion(el.dataset.region); });
+}
+
+// 지역 드롭다운
+const regionSel=document.getElementById('region');
+DATA.regionSummary.slice().sort((a,b)=>b.totalCount-a.totalCount).forEach(r=>{
+  regionSel.add(new Option(`${regTag(r)} (${r.totalCount}대)`, regTag(r)));
+});
+
+function setRegion(tag){
+  selectedRegion = (selectedRegion===tag ? '' : tag); // 같은 지역 재클릭 시 해제
+  regionSel.value = selectedRegion;
+  const sb=document.getElementById('selbar');
+  if(selectedRegion){ sb.style.display='flex'; document.getElementById('selName').textContent=selectedRegion; }
+  else sb.style.display='none';
+  renderHeat(); render();
+}
+document.getElementById('clearReg').onclick=()=>setRegion('');
+regionSel.onchange=()=>setRegion(regionSel.value);
+
+// 트림/센터 옵션
+const trimSel=document.getElementById('trim'), centerSel=document.getElementById('center');
+[...new Set(inv.map(c=>c.trim))].forEach(t=>trimSel.add(new Option(t,t)));
+[...new Set(inv.map(c=>c.center))].sort().forEach(c=>centerSel.add(new Option(c,c)));
+
+// ── 요약: 트림별 / 색상별 재고 (고유 차량 기준, 카드 클릭 시 필터) ──
+function countBy(key){
+  const m=new Map();
+  inv.forEach(c=>{ const v=(c[key]||'(미지정)'); m.set(v,(m.get(v)||0)+1); });
+  return [...m.entries()].sort((a,b)=> b[1]-a[1] || String(a[0]).localeCompare(String(b[0]),'ko'));
+}
+function sumCards(elId, entries, sel, pill, onPick){
+  const max=Math.max(...entries.map(e=>e[1]),1);
+  const el=document.getElementById(elId); if(!el) return;
+  el.innerHTML = entries.map(([v,n])=>{
+    const pct=Math.round(n/max*100);
+    const head = pill ? `<div><span class="pill t-${v}">${v}</span></div>` : `<div class="name">${v}</div>`;
+    return `<div class="reg${v===sel?' sel':''}" data-v="${String(v).replace(/"/g,'&quot;')}">
+      ${head}
+      <div class="v">${n}<span class="muted" style="font-size:12px">대</span></div>
+      <div class="bar"><i style="width:${pct}%"></i></div></div>`;
+  }).join('');
+  el.querySelectorAll('.reg').forEach(c=>c.onclick=()=>onPick(c.dataset.v));
+}
+function renderSummaries(){
+  const fextEl=document.getElementById('fext'), fintEl=document.getElementById('fint');
+  sumCards('trimSum', countBy('trim'), trimSel.value, true,  v=>{ trimSel.value = trimSel.value===v?'':v; render(); });
+  sumCards('extSum',  countBy('ext'),  fextEl.value,  false, v=>{ fextEl.value  = fextEl.value===v?'':v;   render(); });
+  sumCards('intSum',  countBy('int'),  fintEl.value,  false, v=>{ fintEl.value  = fintEl.value===v?'':v;   render(); });
+}
+
+function render(){
+  const lc = id => document.getElementById(id).value.trim().toLowerCase();
+  const q=lc('q'), fext=lc('fext'), fint=lc('fint'), fopt=lc('fopt');
+  const ft=trimSel.value, fc=centerSel.value, mp=Number(document.getElementById('maxp').value)||Infinity;
+  let rows = inv.filter(c=>{
+    if(selectedRegion && !(c.foundIn||[]).includes(selectedRegion)) return false;
+    if(ft && c.trim!==ft) return false;
+    if(fc && c.center!==fc) return false;
+    if(c.price>mp) return false;
+    // 필드별 검색 (AND)
+    if(fext && !(c.ext||'').toLowerCase().includes(fext)) return false;
+    if(fint && !(c.int||'').toLowerCase().includes(fint)) return false;
+    if(fopt && !(c.opt||'').toLowerCase().includes(fopt)) return false;
+    // 통합 검색
+    if(q){ const hay=(c.trim+c.ext+c.int+c.center+(c.opt||'')+(c.foundIn||[]).join('')).toLowerCase(); if(!hay.includes(q)) return false; }
+    return true;
+  });
+  rows.sort((a,b)=>{ const x=a[sortKey],y=b[sortKey];
+    return (typeof x==='number'? x-y : String(x).localeCompare(String(y),'ko'))*sortDir; });
+  document.getElementById('rowcount').textContent = '— '+rows.length+'대'+(selectedRegion?' ('+selectedRegion+')':'');
+  document.querySelector('#tbl tbody').innerHTML = rows.map(c=>{
+    const optHtml = c.opts.length
+      ? c.opts.map(o=>`${o.n} <span class="optp">+${man(o.p)}</span>`).join('<br>') +
+        `<div class="muted" style="margin-top:3px">합계 +${man(c.optTotal)}</div>`
+      : '<span class="muted">-</span>';
+    const foundHtml = (c.foundIn||[]).map(f=>`<span class="tag${f===selectedRegion?'" style="background:#1d4ed8;color:#fff':''}">${f}</span>`).join('');
+    return `<tr>
+      <td data-label="트림"><span class="pill t-${c.trim}">${c.trim}</span></td>
+      <td data-label="외장색상" class="nowrap">${c.ext}${c.colorPkg?` <span class="muted">(${c.colorPkg})</span>`:''}</td>
+      <td data-label="내장색상">${c.int}</td>
+      <td data-label="판매금액" class="right nowrap">${won(c.price)}</td>
+      <td data-label="옵션" class="opt">${optHtml}</td>
+      <td data-label="출고센터" class="nowrap">${c.center}</td>
+      <td data-label="생산일" class="nowrap">${fmtDate(c.prdnDt)}</td>
+      <td data-label="노출지역수" class="right">${c.nreg}</td>
+      <td data-label="노출 지역 목록" class="foundIn">${foundHtml}</td></tr>`;
+  }).join('');
+  renderSummaries();
+}
+document.querySelectorAll('th[data-sort]').forEach(th=>th.onclick=()=>{
+  const k=th.dataset.sort; if(sortKey===k) sortDir*=-1; else {sortKey=k; sortDir=1;} render();
+});
+['q','trim','center','maxp','fext','fint','fopt'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+
+renderHeat(); render();
+
+// ── 카카오 애드핏: 서로 다른 광고단위를 여러 슬롯에 배치 ──
+// 애드핏은 광고단위 1개당 페이지에서 1번만 노출되므로, 슬롯마다 다른 단위를 쓴다.
+const AD = {
+  cPC :{ unit:'DAN-jjknDJxb29QWS2Wt', w:728, h:90 },  // 캐스퍼 가로 PC
+  cMO :{ unit:'DAN-Jp2VnkvCqNs51s5k', w:320, h:100 }, // 캐스퍼 가로 모바일
+  ePC :{ unit:'DAN-POwC5QeLUrYkxklw', w:728, h:90 },  // 가로 PC (전기차 단위 재사용)
+  eMO :{ unit:'DAN-EqqwfYkJxM8GSIQS', w:320, h:50 },  // 가로 모바일
+  sq  :{ unit:'DAN-UtNyIJBZRUxCsbIJ', w:300, h:250 }, // 정사각 1 (PC/모바일)
+  sq2 :{ unit:'DAN-U6nbOfEVs2z1eWgX',          w:300, h:250 }, // 정사각 2 (PC 전용·placeholder)
+  sq3 :{ unit:'DAN-zF171IJNnsFEeQj8',          w:300, h:250 }, // 정사각 3 (PC 전용·placeholder)
+  side:{ unit:'DAN-xVxe3OvWo6Tf9pXx', w:160, h:600 }, // 세로 PC
+};
+function makeIns(a){
+  const ins = document.createElement('ins');
+  ins.className = 'kakao_ad_area'; ins.style.display = 'none';
+  ins.setAttribute('data-ad-width', a.w);
+  ins.setAttribute('data-ad-height', a.h);
+  ins.setAttribute('data-ad-unit', a.unit);
+  return ins;
+}
+function adIns(id, a){ const c = document.getElementById(id); if(!c || !a) return; c.innerHTML=''; c.appendChild(makeIns(a)); }
+function adRow(id, arr){ const c = document.getElementById(id); if(!c) return; c.innerHTML=''; arr.filter(Boolean).forEach(a=>c.appendChild(makeIns(a))); }
+const isPC = window.matchMedia('(min-width:768px)').matches;
+adIns('adfit-top',    isPC ? AD.cPC : AD.cMO);              // 상단 가로
+adRow('adfit-mid',    isPC ? [AD.sq, AD.sq2, AD.sq3] : [AD.sq]); // 정사각: PC 3개 가로배열 / 모바일 1개
+adIns('adfit-bottom', isPC ? AD.ePC : AD.eMO);              // 하단 가로
+if (window.matchMedia('(min-width:1600px)').matches) adIns('adfit-side', AD.side); // 넓은 PC 세로
+const adScript = document.createElement('script');
+adScript.async = true; adScript.type = 'text/javascript';
+adScript.src = '//t1.daumcdn.net/kas/static/ba.min.js';
+document.body.appendChild(adScript);
+</script>
+</body>
+</html>

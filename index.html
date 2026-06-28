@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>캐스퍼 · 전기차 보조금 리포트</title>
+<style>
+  :root{color-scheme:light}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",Roboto,"Segoe UI",sans-serif;
+    background:linear-gradient(160deg,#0f1722,#16202c);color:#e7eef5;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+  h1{font-size:24px;margin:0 0 6px;text-align:center}
+  p.sub{margin:0 0 28px;color:#9fb0c0;font-size:14px;text-align:center}
+  .cards{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;width:100%;max-width:720px}
+  a.card{flex:1 1 280px;text-decoration:none;color:inherit;background:#1b2632;border:1px solid #2c3a47;
+    border-radius:16px;padding:26px 24px;transition:.14s;display:block}
+  a.card:hover{transform:translateY(-3px);border-color:#3d5165;filter:brightness(1.08)}
+  .ico{font-size:34px}
+  .ttl{font-size:18px;font-weight:700;margin:10px 0 4px}
+  .desc{font-size:13px;color:#9fb0c0;line-height:1.5}
+  .ar{margin-top:14px;font-size:13px;color:#6ab0ff;font-weight:600}
+  footer{margin-top:30px;font-size:12px;color:#6b7c8c;text-align:center}
+</style>
+</head>
+<body>
+  <h1>보조금 리포트</h1>
+  <p class="sub">캐스퍼 EV 재고 · 전기차 지자체 보조금</p>
+  <div class="cards">
+    <a class="card" href="/casper/casper_report/">
+      <div class="ico">🚗</div>
+      <div class="ttl">캐스퍼 EV 재고 리포트</div>
+      <div class="desc">기획전 차량 재고·트림·색상·지역별 현황</div>
+      <div class="ar">바로가기 →</div>
+    </a>
+    <a class="card" href="/ev/ev_subsidy/">
+      <div class="ico">⚡</div>
+      <div class="ttl">전기차 지자체 보조금 리포트</div>
+      <div class="desc">차량 모델별 최대 보조금 지자체 정리 (국비+지방비)</div>
+      <div class="ar">바로가기 →</div>
+    </a>
+  </div>
+  <footer>출처 ev.or.kr · 현대 캐스퍼 기획전 · 자동 갱신</footer>
+</body>
+</html>
