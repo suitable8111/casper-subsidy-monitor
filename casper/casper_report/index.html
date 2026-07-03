@@ -121,12 +121,12 @@
   </section>
 
   <section>
-    <h2>트림별 재고 <span class="count">— 고유 차량 0대 기준 · 카드 클릭 시 해당 트림으로 필터</span></h2>
+    <h2>트림별 재고 <span class="count">— 고유 차량 1대 기준 · 카드 클릭 시 해당 트림으로 필터</span></h2>
     <div class="heat" id="trimSum"></div>
   </section>
 
   <section>
-    <h2>색상별 재고 <span class="count">— 고유 차량 0대 기준 · 카드 클릭 시 해당 색상으로 필터</span></h2>
+    <h2>색상별 재고 <span class="count">— 고유 차량 1대 기준 · 카드 클릭 시 해당 색상으로 필터</span></h2>
     <div class="sublabel">외장 색상</div>
     <div class="heat" id="extSum"></div>
     <div class="sublabel" style="margin-top:14px">내장 색상</div>
@@ -178,7 +178,7 @@
 </div>
 
 <script>
-const DATA = {"collectedAt":"2026-07-03T09:13:48.441Z","exhbNo":"E20260716","carCode":"AX05 (2026 캐스퍼 일렉트릭)","scanDepth":"sido (시/도별 대표 시/군/구 1곳; 페이지네이션 포함)","note":"옵션 opt=\"이름:가격;...\" (원). saleCtyNo 기준 중복제거. totalCount=지역 전체 재고수.","optionFormat":"opt 필드: \"옵션명:가격;옵션명:가격\" (단위 원)","regionSummary":[{"sido":"서울","sigun":"서울특별시","totalCount":0,"collected":0},{"sido":"인천","sigun":"강화군","totalCount":0,"collected":0},{"sido":"경기","sigun":"가평군","totalCount":0,"collected":0},{"sido":"강원","sigun":"강릉시","totalCount":0,"collected":0},{"sido":"세종","sigun":"세종특별자치시","totalCount":0,"collected":0},{"sido":"충남","sigun":"계룡시","totalCount":0,"collected":0},{"sido":"대전","sigun":"대전광역시","totalCount":0,"collected":0},{"sido":"충북","sigun":"괴산군","totalCount":0,"collected":0},{"sido":"대구","sigun":"군위군","totalCount":0,"collected":0},{"sido":"경북","sigun":"경산시","totalCount":0,"collected":0},{"sido":"부산","sigun":"부산광역시","totalCount":0,"collected":0},{"sido":"경남","sigun":"거제시","totalCount":0,"collected":0},{"sido":"울산","sigun":"울산광역시","totalCount":0,"collected":0},{"sido":"전북","sigun":"고창군","totalCount":0,"collected":0},{"sido":"전남","sigun":"강진군","totalCount":0,"collected":0},{"sido":"광주","sigun":"광주광역시(5개구)","totalCount":0,"collected":0},{"sido":"제주","sigun":"서귀포시","totalCount":0,"collected":0}],"totalUniqueCars":0,"inventory":[]};
+const DATA = {"collectedAt":"2026-07-03T12:42:35.891Z","exhbNo":"E20260716","carCode":"AX05 (2026 캐스퍼 일렉트릭)","scanDepth":"sido (시/도별 대표 시/군/구 1곳; 페이지네이션 포함)","note":"옵션 opt=\"이름:가격;...\" (원). saleCtyNo 기준 중복제거. totalCount=지역 전체 재고수.","optionFormat":"opt 필드: \"옵션명:가격;옵션명:가격\" (단위 원)","regionSummary":[{"sido":"서울","sigun":"서울특별시","totalCount":1,"collected":1},{"sido":"인천","sigun":"강화군","totalCount":1,"collected":1},{"sido":"경기","sigun":"가평군","totalCount":1,"collected":1},{"sido":"강원","sigun":"강릉시","totalCount":0,"collected":0},{"sido":"세종","sigun":"세종특별자치시","totalCount":0,"collected":0},{"sido":"충남","sigun":"계룡시","totalCount":0,"collected":0},{"sido":"대전","sigun":"대전광역시","totalCount":0,"collected":0},{"sido":"충북","sigun":"괴산군","totalCount":0,"collected":0},{"sido":"대구","sigun":"군위군","totalCount":0,"collected":0},{"sido":"경북","sigun":"경산시","totalCount":0,"collected":0},{"sido":"부산","sigun":"부산광역시","totalCount":0,"collected":0},{"sido":"경남","sigun":"거제시","totalCount":0,"collected":0},{"sido":"울산","sigun":"울산광역시","totalCount":0,"collected":0},{"sido":"전북","sigun":"고창군","totalCount":0,"collected":0},{"sido":"전남","sigun":"강진군","totalCount":0,"collected":0},{"sido":"광주","sigun":"광주광역시(5개구)","totalCount":0,"collected":0},{"sido":"제주","sigun":"서귀포시","totalCount":0,"collected":0}],"totalUniqueCars":1,"inventory":[{"saleCtyNo":"B01-AXJJ4VPT5-A01","trim":"프리미엄","ext":"톰보이 카키","int":"블랙","price":29320000,"center":"신갈출고센터","prdnDt":"20260630","colorPkg":"기본","opt":"","foundIn":["서울 서울특별시","인천 강화군","경기 가평군"]}]};
 const won = n => Number(n).toLocaleString('ko-KR')+'원';
 const man = n => n>=10000 ? (n/10000).toLocaleString('ko-KR')+'만' : n.toLocaleString('ko-KR');
 const fmtDate = s => s && s.length===8 ? `${s.slice(0,4)}.${s.slice(4,6)}.${s.slice(6,8)}` : (s||'');
